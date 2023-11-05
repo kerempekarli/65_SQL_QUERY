@@ -77,26 +77,21 @@ where o.order_id = 10248
 
 40. 3 numaralı ID ye sahip çalışanın 1997 yılında sattığı ürünlerin adı ve adeti
 
-select p.product_name, count(quantity)  from orders o 
-join order_details od
-on o.order_id = od.order_id
+select od.product_id, p.product_name, sum(od.quantity) as total from orders o 
+join order_details od 
+on o.order_id = od.order_id 
 join products p 
 on p.product_id = od.product_id
-where employee_id = 3 and date_part('year', o.order_date) = 1997
-group by p.product_id
+where o.employee_id = 3 and EXTRACT(Year from o.order_date) = 1997 
+group by od.product_id, p.product_name
+order by total desc 
 
 41. 1997 yılında bir defasinda en çok satış yapan çalışanımın ID,Ad soyad
 
-SELECT e.employee_id,
-e.first_name || ' ' || e.last_name FROM employees e
-WHERE e.employee_id = (
-  SELECT o.employee_id
-  FROM orders o
-  JOIN order_details od ON o.order_id = od.order_id
-  GROUP BY o.employee_id
-  ORDER BY SUM(od.unit_price * od.quantity) DESC
-  LIMIT 1
-);
+
+select e.employee_id, e.first_name || ' ' || e.last_name as ad_soyad from employees e where e.employee_id = (select o.employee_id from orders o join order_details od on o.order_id = od.order_id
+ where EXTRACT(YEAR FROM o.order_date) = 1997
+group by o.order_id order by sum(od.quantity * od.unit_price ) desc limit 1)
 
 
 
